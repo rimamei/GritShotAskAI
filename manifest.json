@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "GritShot AI",
+  "name": "Screenshot Preview + OpenAI",
   "version": "1.0.0",
   "description": "Paste a system screenshot (Cmd+Shift+5) then send to OpenAI Vision with your prompt. Test connection in-app.",
   "action": {
     "default_title": "Preview + OpenAI",
     "default_icon": {
-      "16": "icons/icon.ico",
-      "48": "icons/icon.ico",
-      "128": "icons/icon.ico"
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     },
     "default_popup": "popup.html"
   },
