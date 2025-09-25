@@ -36,18 +36,18 @@
 
     <!-- Tab Navigation -->
     <nav class="card tab-container">
-      <button data-target="panel-prompt" class="tab tab-active" id="promptTab">
+      <button data-target="panel-1" class="tab tab-active" id="promptTab">
         <img class="tab-icon" src="./icons/ask_white.svg" alt="Ask AI">
         <span>Ask AI</span>
       </button>
-      <button data-target="panel-settings" class="tab" id="settingsTab">
+      <button data-target="panel-2" class="tab" id="settingsTab">
         <img class="tab-icon" src="./icons/setting.svg" alt="Settings">
         <span>Settings</span>
       </button>
     </nav>
     
     <!-- Prompt Panel -->
-    <section id="panel-prompt" class="card form view">
+    <section id="panel-1" class="card form view">
       <div class="form-title">
         <img src="./icons/ss.svg" alt="Screenshot">
         <p class="form-title-text">Screenshot and Ask Anything</p>
@@ -60,24 +60,28 @@
             <img src="./icons/paste.svg" alt="Paste">
             Paste Clipboard
           </button>
-          <button id="clearBtn" class="btn" title="Clear current image">
+          <button id="clearBtn" class="btn hidden" title="Clear current image">
             <img src="./icons/clear.svg" alt="Clear">
             Clear
           </button>
         </div>
 
-        <div id="dropZone" class="dropzone">
+        <div id="dropzone" class="dropzone">
           <div class="dropzone-instructions">
             <p>
-              <strong>Drag &amp; drop</strong> an image here,<br>
+              <strong>Browse</strong> or <strong>Drag &amp; drop</strong> an image here,<br>
               or <strong>Paste</strong> from clipboard.
             </p>
             <small class="note">Supports PNG, JPG, and JPEG formats.</small>
           </div>
         </div>
+        <input type="file" id="fileInput" class="hidden" accept="image/png, image/jpeg, image/jpg">
 
-        <img id="preview" class="image-preview" alt="Image preview">
-        <div id="status" class="status-message"></div>
+        <div id="dropzonePreview" class="dropzone hidden">
+          <img id="preview" class="image-preview" alt="Image preview">
+        </div>
+
+        <div id="status-image" class="status-message"></div>
       </div>
 
       <!-- Prompt Input -->
@@ -95,10 +99,11 @@
           Send Request
         </button>
       </div>
+      <div id="validationStatus" class="status-message"></div>
     </section>
 
     <!-- Response Panel -->
-    <section id="panel-response" class="card response view">
+    <section id="panel-1" class="card response view">
       <div class="form-title">
         <img src="./icons/ask_active.svg" alt="AI Response">
         <p class="form-title-text">AI Response</p>
@@ -109,7 +114,7 @@
     </section>
 
     <!-- Settings Panel -->
-    <section id="panel-settings" class="card form view hidden">
+    <section id="panel-2" class="card form view hidden">
       <div class="form-title">
         <img src="./icons/setting.svg" alt="Settings">
         <p class="form-title-text">Settings</p>
@@ -118,7 +123,7 @@
       <div class="warning-card">
         <p><strong>Security Notice</strong></p>
         <p>Your API key is stored locally in your browser's storage. Keep it secure and don't share it with anyone.</p>
-        <button class="btn-black btn" id="clearApiKeyBtn">
+        <button class="btn-black btn hidden" id="clearApiKeyBtn">
           Clear API Key
         </button>
         <span id="clearApiKeyStatus" class="status-message error"></span>
