@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GritShot AI - Screenshot Preview + AI Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="main-container">
+    <header class="app-header">
+      <h1 class="title-header">GritShot AI</h1>
+      <p class="title-header-desc">Drop Screenshot and Ask AI</p>
+      
+      <div class="notes card hidden" id="instructionsCard">
+        <h3 class="hint quick-steps">Quick Steps:</h3>
+        <ol class="steps">
+          <li>
+            <strong>Take a screenshot</strong> by pressing
+            <kbd class="kbd">Win+Shift+S</kbd> (Windows) or
+            <kbd class="kbd">⌘+Shift+5</kbd> (macOS).
+          </li>
+          <li>
+            <strong>Copy the screenshot</strong> to the clipboard by pressing
+            <kbd class="kbd">Ctrl+C</kbd> (Windows) or
+            <kbd class="kbd">⌘+C</kbd> (macOS).
+          </li>
+          <li>
+            <strong>Click GritShot AI</strong>, then <strong>Paste</strong> by pressing
+            <kbd class="kbd">Ctrl+V</kbd> (Windows) or
+            <kbd class="kbd">⌘+V</kbd> (macOS)
+          </li>
+        </ol>
+      </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="card tab-container">
+      <button data-target="panel-prompt" class="tab tab-active" id="promptTab">
+        <img class="tab-icon" src="./icons/ask_white.svg" alt="Ask AI">
+        <span>Ask AI</span>
+      </button>
+      <button data-target="panel-settings" class="tab" id="settingsTab">
+        <img class="tab-icon" src="./icons/setting.svg" alt="Settings">
+        <span>Settings</span>
+      </button>
+    </nav>
+    
+    <!-- Prompt Panel -->
+    <section id="panel-prompt" class="card form view">
+      <div class="form-title">
+        <img src="./icons/ss.svg" alt="Screenshot">
+        <p class="form-title-text">Screenshot and Ask Anything</p>
+      </div>
+
+      <!-- Image Upload Section -->
+      <div class="image-upload-section">
+        <div class="dropzone-controls">
+          <button id="pasteBtn" class="btn" title="Paste image from clipboard">
+            <img src="./icons/paste.svg" alt="Paste">
+            Paste Clipboard
+          </button>
+          <button id="clearBtn" class="btn" title="Clear current image">
+            <img src="./icons/clear.svg" alt="Clear">
+            Clear
+          </button>
+        </div>
+
+        <div id="dropZone" class="dropzone">
+          <div class="dropzone-instructions">
+            <p>
+              <strong>Drag &amp; drop</strong> an image here,<br>
+              or <strong>Paste</strong> from clipboard.
+            </p>
+            <small class="note">Supports PNG, JPG, and JPEG formats.</small>
+          </div>
+        </div>
+
+        <img id="preview" class="image-preview" alt="Image preview">
+        <div id="status" class="status-message"></div>
+      </div>
+
+      <!-- Prompt Input -->
+      <div class="form-group">
+        <label for="prompt">Prompt</label>
+        <textarea
+          id="prompt"
+          placeholder="Briefly describe the image and highlight key points."
+          rows="4"
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button id="analyzeBtn" class="btn-primary btn">
+          Send Request
+        </button>
+      </div>
+    </section>
+
+    <!-- Response Panel -->
+    <section id="panel-response" class="card response view">
+      <div class="form-title">
+        <img src="./icons/ask_active.svg" alt="AI Response">
+        <p class="form-title-text">AI Response</p>
+      </div>
+      <div class="response-container">
+        <pre id="answer" class="answer">No request has been made yet.</pre>
+      </div>
+    </section>
+
+    <!-- Settings Panel -->
+    <section id="panel-settings" class="card form view hidden">
+      <div class="form-title">
+        <img src="./icons/setting.svg" alt="Settings">
+        <p class="form-title-text">Settings</p>
+      </div>
+
+      <div class="warning-card">
+        <p><strong>Security Notice</strong></p>
+        <p>Your API key is stored locally in your browser's storage. Keep it secure and don't share it with anyone.</p>
+        <button class="btn-black btn" id="clearApiKeyBtn">
+          Clear API Key
+        </button>
+        <span id="clearApiKeyStatus" class="status-message error"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="apiKeySetting">OpenAI API Key</label>
+        <input
+          id="apiKeySetting"
+          type="password"
+          placeholder="sk-..."
+          autocomplete="off"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="modelSetting">Model</label>
+        <select id="modelSetting">
+          <option value="gpt-4o-mini">GPT-4o Mini (Vision) - Faster</option>
+          <option value="gpt-4o">GPT-4o (Vision) - More Accurate</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="promptSetting">Default Prompt Template</label>
+        <textarea
+          id="promptSetting"
+          placeholder="Briefly describe the image and highlight key points."
+          rows="4"
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button id="saveBtn" class="btn-primary btn">
+          Save Settings
+        </button>
+      </div>
+      <div id="statusSetting" class="status-message"></div>
+    </section>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
