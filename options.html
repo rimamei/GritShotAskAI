@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GritShot AI - Screenshot Preview + OpenAI</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header><h1 class="title-header">GritShot AI</h1></header>
+    <div class="section card">
+      <div class="grid">
+        <label>API Key</label>
+        <input id="apiKey" type="password" placeholder="sk-..." />
+
+        <label>Model</label>
+        <select id="model">
+          <option value="gpt-4o-mini">gpt-4o-mini (vision)</option>
+          <option value="gpt-4o">gpt-4o (vision)</option>
+        </select>
+
+        <label>Default Prompt</label>
+        <textarea
+          id="prompt"
+          placeholder="Contoh: Ringkas isi gambar & berikan bullet points."
+        ></textarea>
+      </div>
+      <div style="margin-top: 10px">
+        <button id="saveBtn" class="btn">💾 Simpan</button>
+        <span id="status"></span>
+      </div>
+    </div>
+    <script src="options.js"></script>
+  </body>
+</html>
