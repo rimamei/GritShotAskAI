@@ -3,11 +3,11 @@
 <div align="center">
 	<img src="icons/icon.png" alt="GritShotAskAI Logo" width="128"/>
 	
-	**AI-powered browser extension for instant Q&A assistance**
+	AI-powered browser extension for instant Q&A assistance
 	
-	[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-	[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
-	[![Version](https://img.shields.io/badge/version-0.0.1-green.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore/detail)
+[![Version](https://img.shields.io/badge/version-0.0.1-green.svg)](https://github.com/your-username/your-repo/releases)
 </div>
 
 ---
@@ -23,13 +23,16 @@
 ## 🛠️ Installation
 
 ### From Source
+
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/kikiginanjar16/GritShotAskAI.git
    cd GritShotAskAI
    ```
 
 2. **Load in Chrome/Edge/Brave:**
+
    - Open browser and navigate to `chrome://extensions/`
    - Enable **"Developer mode"** (toggle in top-right corner)
    - Click **"Load unpacked"** button
@@ -42,6 +45,7 @@
 ## 🚀 Usage
 
 ### Basic Usage
+
 1. Click the **GritShotAskAI icon** in your browser toolbar
 2. Type your question in the popup window
 3. Press **Enter** or click **Ask** to get your AI-powered answer
@@ -63,11 +67,13 @@ GritShotAskAI/
 ## 🔧 Development
 
 ### Prerequisites
+
 - Modern web browser (Chrome, Edge, Brave)
 - Basic knowledge of HTML, CSS, JavaScript
 - Text editor or IDE
 
 ### Local Development
+
 1. Make your changes to the source files
 2. Reload the extension in `chrome://extensions/`
 3. Test functionality in the popup and options pages
@@ -77,6 +83,7 @@ GritShotAskAI/
 We welcome contributions! Here's how you can help:
 
 ### How to Contribute
+
 1. **Fork** the repository
 2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
 3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
@@ -84,6 +91,7 @@ We welcome contributions! Here's how you can help:
 5. **Open** a Pull Request
 
 ### Contribution Guidelines
+
 - Follow existing code style and formatting
 - Test your changes thoroughly
 - Update documentation if necessary
@@ -101,8 +109,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 👥 Authors & Contributors
 
-- **@kikiginanjar16** - *Initial work and Development* - [GitHub](https://github.com/kikiginanjar16)
-- **@rimamei** - *Logo Branding, Design Branding, and Frontend Enhancement* - [GitHub](https://github.com/rimamei)
+- **@kikiginanjar16** - _Initial work and Development_ - [GitHub](https://github.com/kikiginanjar16)
+- **@rimamei** - _Logo Branding, Design Branding, and Frontend Enhancement_ - [GitHub](https://github.com/rimamei)
 
 See also the list of [contributors](https://github.com/kikiginanjar16/GritShotAskAI/contributors) who participated in this project.
 
