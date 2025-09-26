@@ -1,5 +1,5 @@
 /**
- * GritShot AI Chrome Extension - Main Popup Script
+ * GritShot AI Chrome Extension - Main Popup Script with Gemini Support
  */
 
 class GritShotApp {
@@ -29,15 +29,27 @@ class GritShotApp {
       prompt: document.getElementById('prompt'),
       fileInput: document.getElementById('fileInput'),
 
-      // Input elements settings
+      // AI Provider settings
+      aiProvider: document.getElementById('aiProvider'),
+      openaiSettings: document.getElementById('openaiSettings'),
+      geminiSettings: document.getElementById('geminiSettings'),
+
+      // OpenAI settings
       apiKeySetting: document.getElementById('apiKeySetting'),
       modelSetting: document.getElementById('modelSetting'),
-      defaultPromptSetting: document.getElementById('promptSetting'),
 
+      // Gemini settings
+      geminiApiKeySetting: document.getElementById('geminiApiKeySetting'),
+      geminiModelSetting: document.getElementById('geminiModelSetting'),
+
+      // Common settings
+      defaultPromptSetting: document.getElementById('promptSetting'),
+      
       // Status elements
       statusSetting: document.getElementById('statusSetting'),
       clearApiKeyBtn: document.getElementById('clearApiKeyBtn'),
       clearApiKeyStatus: document.getElementById('clearApiKeyStatus'),
+      notesPanel1: document.getElementById('notesPanel1'),
 
       // Tab elements
       tabs: document.querySelectorAll('.tab[data-target]'),
@@ -49,23 +61,64 @@ class GritShotApp {
     await this.loadSettings();
     this.attachEventListeners();
     this.setupTabNavigation();
+    this.setupProviderSwitch();
+
+    // validation
     this.validatePromptForm(); // Set initial button state
     this.validateSettingsForm(); // For the settings form
 
-    if (!this.elements.apiKeySetting.value.trim()) {
+    const currentProvider = this.elements.aiProvider.value;
+    const hasApiKey = this.getCurrentApiKey().trim();
+    
+    if (!hasApiKey) {
       this.switchToTab('panel-2');
       this.showSettingsStatus(
-        'Please enter your OpenAI API key to begin.',
+        `Please enter your ${currentProvider === 'openai' ? 'OpenAI' : 'Gemini'} API key to begin.`,
         'warning'
       );
+      this.elements.notesPanel1.classList.remove('hidden');
     }
+  }
+
+  // Get current API key based on selected provider
+  getCurrentApiKey() {
+    const provider = this.elements.aiProvider.value;
+    return provider === 'openai' 
+      ? this.elements.apiKeySetting.value 
+      : this.elements.geminiApiKeySetting.value;
+  }
+
+  // Get current model based on selected provider
+  getCurrentModel() {
+    const provider = this.elements.aiProvider.value;
+    return provider === 'openai' 
+      ? this.elements.modelSetting.value 
+      : this.elements.geminiModelSetting.value;
+  }
+
+  // Setup provider switching
+  setupProviderSwitch() {
+    this.elements.aiProvider.addEventListener('change', () => {
+      const provider = this.elements.aiProvider.value;
+      
+      if (provider === 'openai') {
+        this.elements.openaiSettings.classList.remove('hidden');
+        this.elements.geminiSettings.classList.add('hidden');
+      } else {
+        this.elements.openaiSettings.classList.add('hidden');
+        this.elements.geminiSettings.classList.remove('hidden');
+      }
+      
+      this.validateSettingsForm();
+    });
   }
 
   // Form Validation for Ask AI
   validatePromptForm() {
     const hasImage = !!this.state.currentImage;
     const hasPrompt = this.elements.prompt.value.trim() !== '';
-    const isFormValid = hasImage && hasPrompt;
+    const hasApiKey = !!this.getCurrentApiKey().trim();
+    const isFormValid = hasImage && hasPrompt && hasApiKey;
 
     // Enable or disable the button based on validation
     this.elements.analyzeBtn.disabled = !isFormValid;
@@ -73,13 +126,21 @@ class GritShotApp {
 
   // Form Validation for Settings
   validateSettingsForm() {
-    const hasDefaultPrompt =
-      this.elements.defaultPromptSetting.value.trim() !== '';
-    const hasApiKey = this.elements.apiKeySetting.value.trim() !== '';
-    const hasModel = this.elements.modelSetting.value.trim() !== '';
+    const hasDefaultPrompt = this.elements.defaultPromptSetting.value.trim() !== '';
+    const provider = this.elements.aiProvider.value;
+    
+    let hasApiKey = false;
+    let hasModel = false;
+    
+    if (provider === 'openai') {
+      hasApiKey = this.elements.apiKeySetting.value.trim() !== '';
+      hasModel = this.elements.modelSetting.value.trim() !== '';
+    } else {
+      hasApiKey = this.elements.geminiApiKeySetting.value.trim() !== '';
+      hasModel = this.elements.geminiModelSetting.value.trim() !== '';
+    }
 
     const isFormValid = hasDefaultPrompt && hasApiKey && hasModel;
-
     this.elements.saveBtn.disabled = !isFormValid;
   }
 
@@ -91,86 +152,151 @@ class GritShotApp {
 
     try {
       const settings = await chrome.storage.local.get([
+        'ai_provider',
         'openai_api_key',
         'openai_model',
-        'openai_prompt',
+        'gemini_api_key',
+        'gemini_model',
+        'default_prompt',
       ]);
 
-      // Show or hide the 'Clear API Key' button based on whether a key is stored.
-      if (settings.openai_api_key) {
-        this.elements.apiKeySetting.value = settings.openai_api_key;
-        this.elements.clearApiKeyBtn.classList.remove('hidden'); // Show the button
-      } else {
-        this.elements.clearApiKeyBtn.classList.add('hidden'); // Keep it hidden
+      // Set AI provider
+      if (settings.ai_provider) {
+        this.elements.aiProvider.value = settings.ai_provider;
       }
 
+      // Load OpenAI settings
       if (settings.openai_api_key) {
         this.elements.apiKeySetting.value = settings.openai_api_key;
       }
-
       if (settings.openai_model) {
         this.elements.modelSetting.value = settings.openai_model;
       }
 
-      if (settings.openai_prompt) {
-        this.elements.promptSetting.value = settings.openai_prompt;
-        this.elements.prompt.value = settings.openai_prompt;
-        this.validatePromptForm(); // Re-validate in case a default prompt is loaded
+      // Load Gemini settings
+      if (settings.gemini_api_key) {
+        this.elements.geminiApiKeySetting.value = settings.gemini_api_key;
       }
+      if (settings.gemini_model) {
+        this.elements.geminiModelSetting.value = settings.gemini_model;
+      }
+
+      // Load default prompt
+      if (settings.default_prompt) {
+        this.elements.defaultPromptSetting.value = settings.default_prompt;
+        this.elements.prompt.value = settings.default_prompt;
+      }
+
+      // Show/hide provider settings and clear button
+      const currentProvider = this.elements.aiProvider.value;
+      if (currentProvider === 'openai') {
+        this.elements.openaiSettings.classList.remove('hidden');
+        this.elements.geminiSettings.classList.add('hidden');
+      } else {
+        this.elements.openaiSettings.classList.add('hidden');
+        this.elements.geminiSettings.classList.remove('hidden');
+      }
+
+      // Show clear button if any API key exists
+      const hasAnyKey = settings.openai_api_key || settings.gemini_api_key;
+      if (hasAnyKey) {
+        this.elements.clearApiKeyBtn.classList.remove('hidden');
+      } else {
+        this.elements.clearApiKeyBtn.classList.add('hidden');
+      }
+
+      this.validatePromptForm();
     } catch (error) {
       console.error('Error loading settings:', error);
       this.showStatus('Error loading settings', 'error');
     }
   }
 
+  // Save settings to chrome.storage
   async saveSettings() {
-    const apiKeyInput = this.elements.apiKeySetting;
-    const apiKey = apiKeyInput.value.trim();
+    const provider = this.elements.aiProvider.value;
+    let apiKey = '';
+    let model = '';
 
-    if (!apiKey.startsWith('sk-') || apiKey.length < 50) {
-      this.showSettingsStatus(
-        "Invalid API Key. It must start with 'sk-' and be complete.",
-        'error'
-      );
-      apiKeyInput.classList.add('input-error');
-      return;
+    // Validate API key based on provider
+    if (provider === 'openai') {
+      apiKey = this.elements.apiKeySetting.value.trim();
+      model = this.elements.modelSetting.value;
+      
+      if (!apiKey.startsWith('sk-') || apiKey.length < 50) {
+        this.showSettingsStatus(
+          "Invalid OpenAI API Key. It must start with 'sk-' and be complete.",
+          'error'
+        );
+        this.elements.apiKeySetting.classList.add('input-error');
+        return;
+      }
+      this.elements.apiKeySetting.classList.remove('input-error');
+    } else {
+      apiKey = this.elements.geminiApiKeySetting.value.trim();
+      model = this.elements.geminiModelSetting.value;
+      
+      if (!apiKey.startsWith('AIza') || apiKey.length < 35) {
+        this.showSettingsStatus(
+          "Invalid Gemini API Key. It must start with 'AIza' and be complete.",
+          'error'
+        );
+        this.elements.geminiApiKeySetting.classList.add('input-error');
+        return;
+      }
+      this.elements.geminiApiKeySetting.classList.remove('input-error');
     }
 
     try {
       const settings = {
-        openai_api_key: apiKey,
-        openai_model: this.elements.modelSetting.value,
-        openai_prompt: this.elements.promptSetting.value.trim(),
+        ai_provider: provider,
+        default_prompt: this.elements.defaultPromptSetting.value.trim(),
       };
 
-      await chrome.storage.local.set(settings);
-      apiKeyInput.classList.remove('input-error'); // Remove error style on success
-      this.showSettingsStatus('Settings saved successfully!', 'success');
+      // Save provider-specific settings
+      if (provider === 'openai') {
+        settings.openai_api_key = apiKey;
+        settings.openai_model = model;
+      } else {
+        settings.gemini_api_key = apiKey;
+        settings.gemini_model = model;
+      }
 
-      this.elements.clearApiKeyBtn.classList.remove('hidden'); // Show button after saving
+      await chrome.storage.local.set(settings);
+      this.showSettingsStatus('Settings saved successfully!', 'success');
+      this.elements.clearApiKeyBtn.classList.remove('hidden');
 
       // Update current prompt if it's empty
       if (!this.elements.prompt.value.trim()) {
-        this.elements.prompt.value = settings.openai_prompt;
+        this.elements.prompt.value = settings.default_prompt;
       }
-      this.validatePromptForm(); // Re-validate after settings change
+      this.validatePromptForm();
+
+      // Hide notes if API key is set
+      this.elements.notesPanel1.classList.add('hidden');
     } catch (error) {
       console.error('Error saving settings:', error);
       this.showSettingsStatus('Error saving settings', 'error');
     }
   }
 
+  // Clear API Keys in storage
   async clearApiKey() {
-    // NOTE: Switched from confirm() to a non-blocking UI for better extension experience.
-    // In a real app, you would build a custom modal here.
     try {
-      await chrome.storage.local.remove('openai_api_key');
+      await chrome.storage.local.remove([
+        'openai_api_key', 
+        'gemini_api_key'
+      ]);
       this.elements.apiKeySetting.value = '';
-      this.showClearApiKeyStatus('API Key deleted successfully');
-      this.elements.clearApiKeyBtn.classList.add('hidden'); // Hide button after clearing
+      this.elements.geminiApiKeySetting.value = '';
+      this.showClearApiKeyStatus('All API Keys deleted successfully');
+      this.elements.clearApiKeyBtn.classList.add('hidden');
+      this.validateSettingsForm();
+      this.validatePromptForm();
+      this.elements.notesPanel1.classList.remove('hidden');
     } catch (error) {
-      console.error('Error clearing API key:', error);
-      this.showClearApiKeyStatus('Error deleting API Key');
+      console.error('Error clearing API keys:', error);
+      this.showClearApiKeyStatus('Error deleting API Keys');
     }
   }
 
@@ -191,7 +317,7 @@ class GritShotApp {
     this.elements.pasteBtn.classList.add('hidden');
     this.elements.clearBtn.classList.remove('hidden');
 
-    this.validatePromptForm(); // Validate after adding image
+    this.validatePromptForm();
   }
 
   async convertToDataUrl(objectUrl) {
@@ -207,6 +333,25 @@ class GritShotApp {
       });
     } catch (error) {
       throw new Error('Failed to convert image to data URL');
+    }
+  }
+
+  async convertToBase64(objectUrl) {
+    try {
+      const response = await fetch(objectUrl);
+      const blob = await response.blob();
+
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result.split(',')[1]; // Remove data URL prefix
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      throw new Error('Failed to convert image to base64');
     }
   }
 
@@ -253,17 +398,111 @@ class GritShotApp {
     this.elements.pasteBtn.classList.remove('hidden');
     this.elements.clearBtn.classList.add('hidden');
 
-    this.validatePromptForm(); // Validate after clearing image
+    this.validatePromptForm();
   }
 
-  // AI Analysis
+  // AI Analysis - OpenAI
+  async analyzeWithOpenAI(prompt, dataUrl, apiKey, model) {
+    const messages = [
+      {
+        role: 'system',
+        content: 'You are a helpful vision assistant. Provide clear, concise, and accurate descriptions. Answer in Indonesian if the user prompt is in Indonesian.',
+      },
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: dataUrl } },
+        ],
+      },
+    ];
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.2,
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenAI API Error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+
+    if (!content) {
+      throw new Error('No response content received from OpenAI API');
+    }
+
+    return content;
+  }
+
+  // AI Analysis - Gemini
+  async analyzeWithGemini(prompt, base64Image, apiKey, model) {
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: prompt },
+            {
+              inline_data: {
+                mime_type: 'image/jpeg',
+                data: base64Image
+              }
+            }
+          ]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 1000,
+      }
+    };
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    console.log('Gemini res', response)
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API Error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+    if (!content) {
+      throw new Error('No response content received from Gemini API');
+    }
+
+    return content;
+  }
+
+  // Main Analysis Function
   async analyzeImage() {
     if (this.state.isProcessing) return;
 
-    // The button being enabled serves as the primary validation, but these are good safeguards.
-    const apiKey = this.elements.apiKeySetting.value.trim();
+    const provider = this.elements.aiProvider.value;
+    const apiKey = this.getCurrentApiKey().trim();
+    const model = this.getCurrentModel();
+    
     if (!apiKey) {
-      this.showStatus('Please enter your OpenAI API key in Settings', 'error');
+      this.showStatus(`Please enter your ${provider === 'openai' ? 'OpenAI' : 'Gemini'} API key in Settings`, 'error');
       return;
     }
     if (!this.state.currentImage) {
@@ -278,56 +517,18 @@ class GritShotApp {
 
     this.state.isProcessing = true;
     this.updateAnalyzeButton(true);
-    this.showStatus('Sending request to OpenAI...', 'loading');
+    this.showStatus(`Sending request to ${provider === 'openai' ? 'OpenAI' : 'Google Gemini'}...`, 'loading');
     this.elements.answer.textContent = 'Processing...';
 
     try {
-      const dataUrl = await this.convertToDataUrl(this.elements.preview.src);
-      const model = this.elements.modelSetting.value;
+      let content;
 
-      const messages = [
-        {
-          role: 'system',
-          content:
-            'You are a helpful vision assistant. Provide clear, concise, and accurate descriptions. Answer in Indonesian if the user prompt is in Indonesian.',
-        },
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: dataUrl } },
-          ],
-        },
-      ];
-
-      const apiUrl = {
-        openapi: 'https://api.openai.com/v1/chat/completions',
-      };
-
-      const response = await fetch(apiUrl.openapi, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          temperature: 0.2,
-          max_tokens: 1000,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API Error (${response.status}): ${errorText}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content?.trim();
-
-      if (!content) {
-        throw new Error('No response content received from API');
+      if (provider === 'openai') {
+        const dataUrl = await this.convertToDataUrl(this.elements.preview.src);
+        content = await this.analyzeWithOpenAI(prompt, dataUrl, apiKey, model);
+      } else {
+        const base64Image = await this.convertToBase64(this.elements.preview.src);
+        content = await this.analyzeWithGemini(prompt, base64Image, apiKey, model);
       }
 
       this.elements.answer.textContent = content;
@@ -351,8 +552,6 @@ class GritShotApp {
       btn.textContent = 'Send Request';
       btn.classList.remove('loading');
     }
-    // The disabled state is now handled by validatePromptForm()
-    // We only manage text and loading class here.
   }
 
   // Event Listeners
@@ -376,10 +575,21 @@ class GritShotApp {
     );
 
     // Add listeners to settings inputs for real-time validation
-    this.elements.apiKeySetting.addEventListener('input', () =>
+    this.elements.aiProvider.addEventListener('change', () =>
       this.validateSettingsForm()
     );
+    this.elements.apiKeySetting.addEventListener('input', () => {
+      this.validateSettingsForm();
+      this.validatePromptForm();
+    });
     this.elements.modelSetting.addEventListener('input', () =>
+      this.validateSettingsForm()
+    );
+    this.elements.geminiApiKeySetting.addEventListener('input', () => {
+      this.validateSettingsForm();
+      this.validatePromptForm();
+    });
+    this.elements.geminiModelSetting.addEventListener('input', () =>
       this.validateSettingsForm()
     );
     this.elements.defaultPromptSetting.addEventListener('input', () =>
@@ -405,7 +615,6 @@ class GritShotApp {
     // Enter key handling
     this.elements.prompt.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-        // Check if button is not disabled before submitting
         if (!this.elements.analyzeBtn.disabled) {
           this.analyzeImage();
         }
@@ -421,7 +630,6 @@ class GritShotApp {
     } else if (file) {
       this.showStatus('Please select a valid image file (PNG, JPG)', 'error');
     }
-    // Reset the input value. This allows selecting the same file again if needed.
     event.target.value = '';
   }
 
@@ -526,9 +734,8 @@ class GritShotApp {
 
   // Status Display Methods
   showStatus(message, type = 'info') {
-    // Use the corrected element property 'statusImage'
     const statusEl = this.elements.statusImage;
-    if (!statusEl) return; // Add a safeguard
+    if (!statusEl) return;
 
     statusEl.textContent = message;
     statusEl.className = `status-message ${type}`;
