@@ -113,7 +113,7 @@ class GritShotApp {
       }
 
       if (settings.openai_prompt) {
-        this.elements.promptSetting.value = settings.openai_prompt;
+        this.elements.defaultPromptSetting.value = settings.openai_prompt;
         this.elements.prompt.value = settings.openai_prompt;
         this.validatePromptForm(); // Re-validate in case a default prompt is loaded
       }
@@ -140,7 +140,7 @@ class GritShotApp {
       const settings = {
         openai_api_key: apiKey,
         openai_model: this.elements.modelSetting.value,
-        openai_prompt: this.elements.promptSetting.value.trim(),
+        openai_prompt: this.elements.defaultPromptSetting.value.trim(),
       };
 
       await chrome.storage.local.set(settings);
