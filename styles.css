@@ -48,6 +48,19 @@
   --line-height: 1.45;
 }
 
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1a1a1a;
+    --surface: #2d2d2d;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-muted: #999999;
+    --border-light: #444444;
+    --border-medium: #555555;
+  }
+}
+
 /* Reset and Base Styles */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -584,6 +597,17 @@ textarea:focus-visible {
     --text-muted: #999999;
     --border-light: #444444;
     --border-medium: #555555;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

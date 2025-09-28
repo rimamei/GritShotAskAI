@@ -13,7 +13,7 @@
         <p class="title-header-desc">Drop Screenshot and Ask AI</p>
 
         <div class="notes card hidden" id="instructionsCard">
-          <h3 class="hint quick-steps">Quick Steps:</h3>
+          <h2 class="hint quick-steps">Quick Steps:</h2>
           <ol class="steps">
             <li>
               <strong>Take a screenshot</strong> by pressing
@@ -34,35 +34,55 @@
         </div>
       </header>
 
-      <!-- Tab Navigation -->
-      <nav class="card tab-container">
-        <button data-target="panel-1" class="tab tab-active" id="promptTab">
+      <nav
+        class="card tab-container"
+        role="tablist"
+        aria-label="Main navigation"
+      >
+        <button
+          id="promptTab"
+          data-target="panel-1"
+          class="tab tab-active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-1"
+        >
           <img class="tab-icon" src="./icons/ask_white.svg" alt="Ask AI" />
           <span>Ask AI</span>
         </button>
-        <button data-target="panel-2" class="tab" id="settingsTab">
+        <button
+          id="settingsTab"
+          data-target="panel-2"
+          class="tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-2"
+        >
           <img class="tab-icon" src="./icons/setting.svg" alt="Settings" />
           <span>Settings</span>
         </button>
       </nav>
 
-      <!-- Prompt Panel -->
-      <section id="panel-1" class="view">
+      <section
+        id="panel-1"
+        class="view"
+        role="tabpanel"
+        aria-labelledby="promptTab"
+      >
         <div class="card form">
           <div class="form-title">
-            <img src="./icons/ss.svg" alt="Screenshot" />
-            <p class="form-title-text">Screenshot and Ask Anything</p>
+            <img src="./icons/ss.svg" alt="" aria-hidden="true" />
+            <h2 class="form-title-text">Screenshot and Ask Anything</h2>
           </div>
 
           <div class="warning-card hidden" id="notesPanel1">
-            <p><strong>Notes:</strong></p>
+            <h3>Notes:</h3>
             <p>
               Make sure you have set your <strong>API keys</strong> in the
               <strong>Settings</strong> tab before sending a request.
             </p>
           </div>
 
-          <!-- Image Upload Section -->
           <div class="image-upload-section">
             <div class="dropzone-controls">
               <button
@@ -104,16 +124,20 @@
               <img id="preview" class="image-preview" alt="Image preview" />
             </div>
 
-            <div id="status-image" class="status-message"></div>
+            <div
+              id="status-image"
+              class="status-message"
+              aria-live="polite"
+            ></div>
           </div>
 
-          <!-- Prompt Input -->
           <div class="form-group">
             <label for="prompt">Prompt</label>
             <textarea
               id="prompt"
               placeholder="Briefly describe the image and highlight key points."
               rows="4"
+              aria-required="true"
             ></textarea>
           </div>
 
@@ -122,41 +146,55 @@
               Send Request
             </button>
           </div>
-          <div id="validationStatus" class="status-message"></div>
+          <div
+            id="validationStatus"
+            class="status-message"
+            aria-live="polite"
+          ></div>
         </div>
 
-        <!-- Response Panel -->
         <div class="card response">
           <div class="form-title">
-            <img src="./icons/ask_active.svg" alt="AI Response" />
-            <p class="form-title-text">AI Response</p>
+            <img src="./icons/ask_active.svg" alt="" aria-hidden="true" />
+            <h2 class="form-title-text">AI Response</h2>
           </div>
           <div class="response-container">
-            <pre id="answer" class="answer">No request has been made yet.</pre>
+            <pre
+              id="answer"
+              class="answer"
+              aria-live="polite"
+            >No request has been made yet.</pre>
           </div>
         </div>
       </section>
 
-      <!-- Settings Panel -->
-      <section id="panel-2" class="card form view hidden">
+      <section
+        id="panel-2"
+        class="card form view hidden"
+        role="tabpanel"
+        aria-labelledby="settingsTab"
+      >
         <div class="form-title">
-          <img src="./icons/setting.svg" alt="Settings" />
-          <p class="form-title-text">Settings</p>
+          <img src="./icons/setting.svg" alt="" aria-hidden="true" />
+          <h2 class="form-title-text">Settings</h2>
         </div>
 
         <div class="warning-card">
-          <p><strong>Security Notice</strong></p>
-          <p>
+          <h3>Security Notice</h3>
+          <p id="security-notice">
             Your API keys are stored locally in your browser's storage. Keep
             them secure and don't share them with anyone.
           </p>
           <button class="btn-black btn hidden" id="clearApiKeyBtn">
             Clear API Keys
           </button>
-          <span id="clearApiKeyStatus" class="status-message error"></span>
+          <span
+            id="clearApiKeyStatus"
+            class="status-message error"
+            aria-live="polite"
+          ></span>
         </div>
 
-        <!-- AI Provider Selection -->
         <div class="form-group">
           <label for="aiProvider">AI Provider</label>
           <select id="aiProvider">
@@ -165,7 +203,6 @@
           </select>
         </div>
 
-        <!-- OpenAI Settings -->
         <div id="openaiSettings" class="provider-settings">
           <div class="form-group">
             <label for="apiKeySetting">OpenAI API Key</label>
@@ -174,6 +211,8 @@
               type="password"
               placeholder="sk-..."
               autocomplete="off"
+              aria-required="true"
+              aria-describedby="security-notice"
             />
           </div>
 
@@ -186,7 +225,6 @@
           </div>
         </div>
 
-        <!-- Gemini Settings -->
         <div id="geminiSettings" class="provider-settings hidden">
           <div class="form-group">
             <label for="geminiApiKeySetting">Gemini API Key</label>
@@ -195,6 +233,8 @@
               type="password"
               placeholder="AIza..."
               autocomplete="off"
+              aria-required="true"
+              aria-describedby="security-notice"
             />
             <small class="note"
               >Get your API key from
@@ -232,7 +272,11 @@
         <div class="form-actions">
           <button id="saveBtn" class="btn-primary btn">Save Settings</button>
         </div>
-        <div id="statusSetting" class="status-message"></div>
+        <div
+          id="statusSetting"
+          class="status-message"
+          aria-live="polite"
+        ></div>
       </section>
     </main>
 

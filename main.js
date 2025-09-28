@@ -1,5 +1,5 @@
 /**
- * GritShot AI Chrome Extension - Main Popup Script with Gemini Support
+ * GritShot AI Chrome Extension - Main Popup Script
  */
 
 class GritShotApp {
@@ -52,6 +52,7 @@ class GritShotApp {
       notesPanel1: document.getElementById('notesPanel1'),
 
       // Tab elements
+      tabContainer: document.querySelector('.tab-container'),
       tabs: document.querySelectorAll('.tab[data-target]'),
       panels: document.querySelectorAll('.view'),
     };
@@ -620,6 +621,9 @@ class GritShotApp {
         }
       }
     });
+
+    // Keyboard navigation for tabs
+    this.setupTabKeydownListener();
   }
 
   handleFileSelect(event) {
@@ -700,35 +704,62 @@ class GritShotApp {
       tab.addEventListener('click', () => {
         const targetId = tab.getAttribute('data-target');
 
-        // Update tab states
+        // Update tab and panel states
         this.elements.tabs.forEach((t) => {
           const tId = t.getAttribute('data-target');
           const icon = t.querySelector('.tab-icon');
+          const isActive = t === tab;
 
-          if (t === tab) {
-            t.classList.add('tab-active');
-            t.classList.remove('tab-normal');
-            if (iconStates[tId]?.active) {
-              icon.src = iconStates[tId].active;
-            }
-          } else {
-            t.classList.remove('tab-active');
-            t.classList.add('tab-normal');
-            if (iconStates[tId]?.inactive) {
-              icon.src = iconStates[tId].inactive;
-            }
+          t.classList.toggle('tab-active', isActive);
+          t.classList.toggle('tab-normal', !isActive);
+          t.setAttribute('aria-selected', isActive);
+
+          const iconSrc = isActive
+            ? iconStates[tId]?.active
+            : iconStates[tId]?.inactive;
+          if (icon && iconSrc) {
+            icon.src = iconSrc;
           }
         });
 
-        // Update panel visibility
         this.elements.panels.forEach((panel) => {
-          if (panel.id === targetId) {
-            panel.classList.remove('hidden');
-          } else {
-            panel.classList.add('hidden');
-          }
+          panel.classList.toggle('hidden', panel.id !== targetId);
         });
       });
+    });
+  }
+
+  // Setup keyboard navigation for tabs (Arrow keys)
+  setupTabKeydownListener() {
+    const tabContainer = this.elements.tabContainer;
+    if (!tabContainer) return;
+
+    tabContainer.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') {
+        return;
+      }
+
+      const tabs = Array.from(this.elements.tabs);
+      const focusedTabIndex = tabs.findIndex(
+        (tab) => tab === document.activeElement
+      );
+
+      if (focusedTabIndex === -1) {
+        return;
+      }
+
+      e.preventDefault();
+
+      let nextTabIndex;
+      if (e.key === 'ArrowRight') {
+        nextTabIndex = (focusedTabIndex + 1) % tabs.length;
+      } else {
+        // ArrowLeft
+        nextTabIndex = (focusedTabIndex - 1 + tabs.length) % tabs.length;
+      }
+
+      tabs[nextTabIndex].focus();
+      tabs[nextTabIndex].click(); // Activate tab on focus change
     });
   }
 
