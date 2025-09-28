@@ -1,0 +1,24 @@
+{
+  "name": "gritshotaskai",
+  "version": "0.0.1",
+  "description": "Drop Screenshot and Ask AI",
+  "main": "main.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rimamei/GritShotAskAI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rimamei/GritShotAskAI/issues"
+  },
+  "homepage": "https://github.com/rimamei/GritShotAskAI#readme",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
