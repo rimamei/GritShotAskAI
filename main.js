@@ -804,3 +804,5 @@ class GritShotApp {
 document.addEventListener('DOMContentLoaded', () => {
   new GritShotApp();
 });
+
+module.exports = GritShotApp; 
