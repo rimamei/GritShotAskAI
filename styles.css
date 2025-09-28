@@ -439,8 +439,17 @@ textarea {
 }
 
 /* Response Section */
+/* Fix for extra margin on marked.js output */
 .response-container {
   margin-top: var(--spacing-sm);
+}
+
+.answer > *:first-child {
+  margin-top: 0;
+}
+
+.answer > *:last-child {
+  margin-bottom: 0;
 }
 
 .answer {
