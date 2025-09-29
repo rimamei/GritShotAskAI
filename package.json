@@ -4,7 +4,8 @@
   "description": "Drop Screenshot and Ask AI",
   "main": "main.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
