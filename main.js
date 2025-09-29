@@ -44,7 +44,7 @@ class GritShotApp {
 
       // Common settings
       defaultPromptSetting: document.getElementById('promptSetting'),
-      
+
       // Status elements
       statusSetting: document.getElementById('statusSetting'),
       clearApiKeyBtn: document.getElementById('clearApiKeyBtn'),
@@ -70,11 +70,13 @@ class GritShotApp {
 
     const currentProvider = this.elements.aiProvider.value;
     const hasApiKey = this.getCurrentApiKey().trim();
-    
+
     if (!hasApiKey) {
       this.switchToTab('panel-2');
       this.showSettingsStatus(
-        `Please enter your ${currentProvider === 'openai' ? 'OpenAI' : 'Gemini'} API key to begin.`,
+        `Please enter your ${
+          currentProvider === 'openai' ? 'OpenAI' : 'Gemini'
+        } API key to begin.`,
         'warning'
       );
       this.elements.notesPanel1.classList.remove('hidden');
@@ -84,16 +86,16 @@ class GritShotApp {
   // Get current API key based on selected provider
   getCurrentApiKey() {
     const provider = this.elements.aiProvider.value;
-    return provider === 'openai' 
-      ? this.elements.apiKeySetting.value 
+    return provider === 'openai'
+      ? this.elements.apiKeySetting.value
       : this.elements.geminiApiKeySetting.value;
   }
 
   // Get current model based on selected provider
   getCurrentModel() {
     const provider = this.elements.aiProvider.value;
-    return provider === 'openai' 
-      ? this.elements.modelSetting.value 
+    return provider === 'openai'
+      ? this.elements.modelSetting.value
       : this.elements.geminiModelSetting.value;
   }
 
@@ -101,7 +103,7 @@ class GritShotApp {
   setupProviderSwitch() {
     this.elements.aiProvider.addEventListener('change', () => {
       const provider = this.elements.aiProvider.value;
-      
+
       if (provider === 'openai') {
         this.elements.openaiSettings.classList.remove('hidden');
         this.elements.geminiSettings.classList.add('hidden');
@@ -109,7 +111,7 @@ class GritShotApp {
         this.elements.openaiSettings.classList.add('hidden');
         this.elements.geminiSettings.classList.remove('hidden');
       }
-      
+
       this.validateSettingsForm();
     });
   }
@@ -127,12 +129,13 @@ class GritShotApp {
 
   // Form Validation for Settings
   validateSettingsForm() {
-    const hasDefaultPrompt = this.elements.defaultPromptSetting.value.trim() !== '';
+    const hasDefaultPrompt =
+      this.elements.defaultPromptSetting.value.trim() !== '';
     const provider = this.elements.aiProvider.value;
-    
+
     let hasApiKey = false;
     let hasModel = false;
-    
+
     if (provider === 'openai') {
       hasApiKey = this.elements.apiKeySetting.value.trim() !== '';
       hasModel = this.elements.modelSetting.value.trim() !== '';
@@ -223,7 +226,7 @@ class GritShotApp {
     if (provider === 'openai') {
       apiKey = this.elements.apiKeySetting.value.trim();
       model = this.elements.modelSetting.value;
-      
+
       if (!apiKey.startsWith('sk-') || apiKey.length < 50) {
         this.showSettingsStatus(
           "Invalid OpenAI API Key. It must start with 'sk-' and be complete.",
@@ -236,7 +239,7 @@ class GritShotApp {
     } else {
       apiKey = this.elements.geminiApiKeySetting.value.trim();
       model = this.elements.geminiModelSetting.value;
-      
+
       if (!apiKey.startsWith('AIza') || apiKey.length < 35) {
         this.showSettingsStatus(
           "Invalid Gemini API Key. It must start with 'AIza' and be complete.",
@@ -284,10 +287,7 @@ class GritShotApp {
   // Clear API Keys in storage
   async clearApiKey() {
     try {
-      await chrome.storage.local.remove([
-        'openai_api_key', 
-        'gemini_api_key'
-      ]);
+      await chrome.storage.local.remove(['openai_api_key', 'gemini_api_key']);
       this.elements.apiKeySetting.value = '';
       this.elements.geminiApiKeySetting.value = '';
       this.showClearApiKeyStatus('All API Keys deleted successfully');
@@ -326,12 +326,14 @@ class GritShotApp {
       const response = await fetch(objectUrl);
       const blob = await response.blob();
 
-      return new Promise((resolve, reject) => {
+      const dataUrl = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
+        reader.onerror = (errorEvent) => reject(errorEvent);
         reader.readAsDataURL(blob);
       });
+
+      return dataUrl;
     } catch (error) {
       throw new Error('Failed to convert image to data URL');
     }
@@ -342,16 +344,25 @@ class GritShotApp {
       const response = await fetch(objectUrl);
       const blob = await response.blob();
 
-      return new Promise((resolve, reject) => {
+      // Await the new Promise to ensure its result or error is handled
+      const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          const base64 = reader.result.split(',')[1]; // Remove data URL prefix
-          resolve(base64);
+          // Ensure reader.result is a string before splitting
+          if (typeof reader.result === 'string') {
+            const base64String = reader.result.split(',')[1]; // Remove data URL prefix
+            resolve(base64String);
+          } else {
+            reject(new Error('FileReader result was not a string.'));
+          }
         };
-        reader.onerror = reject;
+        reader.onerror = (errorEvent) => reject(errorEvent); // Pass the error on rejection
         reader.readAsDataURL(blob);
       });
+
+      return base64;
     } catch (error) {
+      // This will now catch errors from fetch() and the FileReader promise
       throw new Error('Failed to convert image to base64');
     }
   }
@@ -407,7 +418,8 @@ class GritShotApp {
     const messages = [
       {
         role: 'system',
-        content: 'You are a helpful vision assistant. Provide clear, concise, and accurate descriptions. Answer in Indonesian if the user prompt is in Indonesian.',
+        content:
+          'You are a helpful vision assistant. Provide clear, concise, and accurate descriptions. Answer in Indonesian if the user prompt is in Indonesian.',
       },
       {
         role: 'user',
@@ -457,27 +469,30 @@ class GritShotApp {
             {
               inline_data: {
                 mime_type: 'image/jpeg',
-                data: base64Image
-              }
-            }
-          ]
-        }
+                data: base64Image,
+              },
+            },
+          ],
+        },
       ],
       generationConfig: {
         temperature: 0.2,
         maxOutputTokens: 1000,
-      }
+      },
     };
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
 
-    console.log('Gemini res', response)
+    console.log('Gemini res', response);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -501,9 +516,14 @@ class GritShotApp {
     const provider = this.elements.aiProvider.value;
     const apiKey = this.getCurrentApiKey().trim();
     const model = this.getCurrentModel();
-    
+
     if (!apiKey) {
-      this.showStatus(`Please enter your ${provider === 'openai' ? 'OpenAI' : 'Gemini'} API key in Settings`, 'error');
+      this.showStatus(
+        `Please enter your ${
+          provider === 'openai' ? 'OpenAI' : 'Gemini'
+        } API key in Settings`,
+        'error'
+      );
       return;
     }
     if (!this.state.currentImage) {
@@ -518,7 +538,12 @@ class GritShotApp {
 
     this.state.isProcessing = true;
     this.updateAnalyzeButton(true);
-    this.showStatus(`Sending request to ${provider === 'openai' ? 'OpenAI' : 'Google Gemini'}...`, 'loading');
+    this.showStatus(
+      `Sending request to ${
+        provider === 'openai' ? 'OpenAI' : 'Google Gemini'
+      }...`,
+      'loading'
+    );
     this.elements.answer.textContent = 'Processing...';
 
     try {
@@ -528,8 +553,15 @@ class GritShotApp {
         const dataUrl = await this.convertToDataUrl(this.elements.preview.src);
         content = await this.analyzeWithOpenAI(prompt, dataUrl, apiKey, model);
       } else {
-        const base64Image = await this.convertToBase64(this.elements.preview.src);
-        content = await this.analyzeWithGemini(prompt, base64Image, apiKey, model);
+        const base64Image = await this.convertToBase64(
+          this.elements.preview.src
+        );
+        content = await this.analyzeWithGemini(
+          prompt,
+          base64Image,
+          apiKey,
+          model
+        );
       }
 
       this.elements.answer.textContent = content;
@@ -805,4 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
   new GritShotApp();
 });
 
-module.exports = GritShotApp; 
+// Conditionally export for testing environments like Jest
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = GritShotApp;
+}
