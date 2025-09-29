@@ -805,4 +805,7 @@ document.addEventListener('DOMContentLoaded', () => {
   new GritShotApp();
 });
 
-module.exports = GritShotApp; 
+// Conditionally export for testing environments like Jest
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = GritShotApp;
+}
